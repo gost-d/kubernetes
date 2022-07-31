@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: itemcounter
+  namespace: app  
+  labels: 
+    app: itemcounter
+spec:
+  replicas: 3 
+  selector: 
+    matchLabels: 
+      app: itemcounter
+  template:
+    metadata:
+      name: itemcounter  
+      labels: 
+        app: itemcounter
+    spec:   
+      containers: 
+        - name: itemcounter
+          image: ghostd/itemcounter:1.0.1
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz 
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources: 
+            limits: 
+              memory: "128Mi"
+              cpu: "0.1" 
+            # request: 
+            #   memory: "256M"
+            #   cpu: "0.1" 
+          env: 
+            - name: REDIS_HOST
+              value: "redisservice:6379"
+      affinity: 
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - itemcounter
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: app-sa  

@@ -1,0 +1,59 @@
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: receiver
+  namespace: app  
+  labels: 
+    app: receiver 
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: receiver 
+  template:
+    metadata: 
+      labels: 
+        app: receiver
+    spec:  
+      containers: 
+        - name: receiver
+          image: ghostd/receiver:1.0.1
+          resources: 
+            limits: 
+              memory: "512Mi"
+              cpu: "0.2"
+            #requests:
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #     - python3
+          #     - liveness_probe.py
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10 
+          envFrom: 
+            - configMapRef: 
+                name: app-configmap 
+      affinity: 
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - receiver  
+              topologyKey: kubernetes.io/hostname
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redispod  
+              topologyKey: kubernetes.io/hostname
+      serviceAccountName: app-sa 

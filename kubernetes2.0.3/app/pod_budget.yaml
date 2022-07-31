@@ -1,0 +1,36 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget 
+metadata: 
+  name: publisher-pdb
+  namespace: app  
+spec: 
+  minAvailable: 1 
+  selector: 
+    matchLabels:
+      app: publisher
+
+---
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget 
+metadata: 
+  name: itemcounter-pdb 
+  namespace: app  
+spec: 
+  minAvailable: 1 
+  selector: 
+    matchLabels:
+      app: itemcounter
+
+---
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget 
+metadata: 
+  name: receiver-pdb 
+  namespace: app  
+spec: 
+  minAvailable: 1 
+  selector: 
+    matchLabels:
+      app: receiver 

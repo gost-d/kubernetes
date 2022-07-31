@@ -1,0 +1,20 @@
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: redispod 
+  namespace: app 
+  labels: 
+    app: redispod 
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: redispod 
+  template: 
+    metadata:
+      labels: 
+        app: redispod 
+    spec: 
+      containers: 
+        - name: redis 
+          image: ghostd/redis:1.0.0

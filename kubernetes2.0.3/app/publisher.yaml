@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: publisher
+  namespace: app 
+  labels: 
+    app: publisher
+spec: 
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: publisher 
+  template: 
+    metadata: 
+      labels: 
+        app: publisher 
+    spec: 
+      containers:
+        - name: publisher
+          image: ghostd/publisher:1.0.1
+          ports: 
+            - containerPort: 9292 
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9292
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9292
+            initialDelaySeconds: 10
+          resources: 
+            limits: 
+              memory: "512Mi"
+              cpu: "0.2"
+            #requests: 
+          envFrom: 
+            - configMapRef: 
+                name: app-configmap 
+      affinity: 
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - publisher 
+              topologyKey: kubernetes.io/hostname 
+      serviceAccountName: app-sa 
+
+
+          
+

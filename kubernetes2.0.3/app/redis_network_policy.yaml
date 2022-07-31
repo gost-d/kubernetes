@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app: redispod 
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: app 
+        - podSelector:
+            matchLabels:
+              app: receiver 
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: itemcounter 
+      ports:
+        - protocol: TCP
+          port: 6379
